@@ -1,17 +1,43 @@
-
-import React from 'react';
-import { View, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Text, Card } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ScreenLayout from '../components/ScreenLayout';
-import { MOVIES, Movie } from '../data/movies';
+import { Movie } from '../data/movies';
 import { RootStackParamList } from '../../App';
 
 type VideoclubScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Videoclub'>;
 
 const VideoclubScreen: React.FC = () => {
     const navigation = useNavigation<VideoclubScreenNavigationProp>();
+    const [movies, setMovies] = useState<Movie[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetchMovies();
+    }, []);
+
+    const fetchMovies = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('http://gbrain.dlsi.ua.es/videoclub/api/v1/catalog');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setMovies(data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching movies:', err);
+            setError('Error al cargar las películas. Por favor, inténtalo de nuevo.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const renderMovieItem = ({ item }: { item: Movie }) => (
         <TouchableOpacity onPress={() => navigation.navigate('MovieDetails', { movie: item })}>
@@ -36,10 +62,31 @@ const VideoclubScreen: React.FC = () => {
         </TouchableOpacity>
     );
 
+    if (loading) {
+        return (
+            <ScreenLayout title="Videoclub">
+                <View style={styles.centerContainer}>
+                    <ActivityIndicator size="large" color="#3D6DCC" />
+                    <Text style={styles.loadingText}>Cargando películas...</Text>
+                </View>
+            </ScreenLayout>
+        );
+    }
+
+    if (error) {
+        return (
+            <ScreenLayout title="Videoclub">
+                <View style={styles.centerContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
+                </View>
+            </ScreenLayout>
+        );
+    }
+
     return (
         <ScreenLayout title="Videoclub" noPadding>
             <FlatList
-                data={MOVIES}
+                data={movies}
                 renderItem={renderMovieItem}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContent}
@@ -49,6 +96,22 @@ const VideoclubScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+    centerContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 12,
+        fontSize: 16,
+        color: '#666',
+    },
+    errorText: {
+        fontSize: 16,
+        color: '#d32f2f',
+        textAlign: 'center',
+        paddingHorizontal: 20,
+    },
     listContent: {
         padding: 16,
         paddingBottom: 16,
