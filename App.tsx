@@ -6,12 +6,15 @@ import HomeScreen from './src/screens/HomeScreen';
 import AutorScreen from './src/screens/AutorScreen';
 import PortfolioScreen from './src/screens/PortfolioScreen';
 import VideoclubScreen from './src/screens/VideoclubScreen';
+import MovieDetailsScreen from './src/screens/MovieDetailsScreen';
+import { Movie } from './src/data/movies';
 
 export type RootStackParamList = {
     Home: undefined;
     Autor: undefined;
     Portfolio: undefined;
     Videoclub: undefined;
+    MovieDetails: { movie: Movie };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -30,6 +33,7 @@ export default function App() {
                     <Stack.Screen name="Autor" component={AutorScreen} />
                     <Stack.Screen name="Portfolio" component={PortfolioScreen} />
                     <Stack.Screen name="Videoclub" component={VideoclubScreen} />
+                    <Stack.Screen name="MovieDetails" component={MovieDetailsScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
         </ThemeProvider>

@@ -1,29 +1,39 @@
+
 import React from 'react';
-import { View, FlatList, Image, StyleSheet } from 'react-native';
+import { View, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Card } from '@rneui/themed';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ScreenLayout from '../components/ScreenLayout';
 import { MOVIES, Movie } from '../data/movies';
+import { RootStackParamList } from '../../App';
+
+type VideoclubScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Videoclub'>;
 
 const VideoclubScreen: React.FC = () => {
+    const navigation = useNavigation<VideoclubScreenNavigationProp>();
+
     const renderMovieItem = ({ item }: { item: Movie }) => (
-        <Card containerStyle={styles.card}>
-            <View style={styles.movieContainer}>
-                <Image
-                    source={{ uri: item.poster }}
-                    style={styles.poster}
-                    resizeMode="cover"
-                />
-                <View style={styles.movieInfo}>
-                    <Text style={styles.title}>{item.title}</Text>
-                    <Text style={styles.details}>
-                        {item.year} - {item.director}
-                    </Text>
-                    <Text style={styles.rented}>
-                        {item.rented === "1" ? "🔴 Alquilada" : "🟢 Disponible"}
-                    </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('MovieDetails', { movie: item })}>
+            <Card containerStyle={styles.card}>
+                <View style={styles.movieContainer}>
+                    <Image
+                        source={{ uri: item.poster }}
+                        style={styles.poster}
+                        resizeMode="cover"
+                    />
+                    <View style={styles.movieInfo}>
+                        <Text style={styles.title}>{item.title}</Text>
+                        <Text style={styles.details}>
+                            {item.year} - {item.director}
+                        </Text>
+                        <Text style={styles.rented}>
+                            {item.rented === "1" ? "🔴 Alquilada" : "🟢 Disponible"}
+                        </Text>
+                    </View>
                 </View>
-            </View>
-        </Card>
+            </Card>
+        </TouchableOpacity>
     );
 
     return (
